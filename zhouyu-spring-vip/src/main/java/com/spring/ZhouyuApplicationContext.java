@@ -6,12 +6,16 @@ import com.zhouyu.util.MyLogger;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
+import java.io.File;
 import java.lang.annotation.Annotation;
+import java.net.URL;
 
 public class ZhouyuApplicationContext {
 
-    Logger logger  = MyLogger.MyLogger(ZhouyuApplicationContext.class);
     private Class configClass;
+
+    Logger logger  = MyLogger.MyLogger(ZhouyuApplicationContext.class);
+
 
     public ZhouyuApplicationContext(Class configClass) {
         this.configClass = configClass;
@@ -23,7 +27,31 @@ public class ZhouyuApplicationContext {
             ComponentScan componentScanAnnotation = (ComponentScan) configClass.getAnnotation(ComponentScan.class);
             String path = componentScanAnnotation.value();
 
-            logger.debug("path is : " +path);
+            if(logger.isDebugEnabled()){
+                logger.debug("path is : " +path);
+            }
+            path = path.replace(".","/");
+
+            ClassLoader classLoader =ZhouyuApplicationContext.class.getClassLoader();
+            URL resource =classLoader.getResource(path);
+            File file = new File(resource.getFile());
+
+            if(file.isDirectory()){//判断文件是不是目录
+                for (File listFile : file.listFiles()) {
+                    //获取文件夹下的文件
+                    String absolutePath  = listFile.getAbsolutePath();
+                    System.out.println(absolutePath);
+                    //将Class文件加载为class对象
+                    Class<?> clazz = classLoader.loadClass(absolutePath);
+                    // 判断有没有Component注解
+                    if(clazz.isAnnotationPresent(Component.class)){
+
+
+                    }
+                }
+            }
+
+
         }
 
 
